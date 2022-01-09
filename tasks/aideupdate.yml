@@ -1,0 +1,18 @@
+- name: Update AIDE after software install
+  command: "sh -c 'grep -v \"syslog:LOG_AUTH\" /etc/aide.conf | aide --update -c - >> /dev/null'"
+  register: aidecmd
+  become: true
+  async: 800
+  poll: 10
+  failed_when: aidecmd.rc > 7
+  ignore_errors: true
+
+- name: Remove old aide db
+  file:
+    path: /var/lib/aide/aide.db.gz
+    state: absent
+  become: true
+
+- name: Move aide db
+  command: mv /var/lib/aide/aide.db.new.gz  /var/lib/aide/aide.db.gz
+  become: true
